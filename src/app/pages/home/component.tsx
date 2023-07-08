@@ -1,19 +1,29 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
 
-import { Logo } from '../../components';
+import { MessageList, NavBar, Page, SendMessage, ThreadsSidebar } from '../../components';
+import { useApp, useWebSocket } from '../../contexts';
 
 export const Home = () => {
-  const { t } = useTranslation();
+  const { fetchThreads } = useApp();
+  const { threadId } = useWebSocket();
+
+  useEffect(() => {
+    fetchThreads();
+    // eslint-disable-next-line
+  }, []);
 
   return (
-    <div className="flex flex-col items-center bg-slate-600 w-full h-full">
-      <Logo className="h-[40px] animate-spin" />
-      <div className="text-white w-full text-center">
-        <Trans i18nKey="pages.home.title" components={[<code key="code" />]} />
-        <a className="text-blue-400" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          {t('pages.home.link')}
-        </a>
+    <Page>
+      <NavBar />
+      <div className="flex w-full h-full">
+        <ThreadsSidebar />
+        {threadId && (
+          <div className="flex flex-col max-md:w-full md:w-[calc(100%-320px)] h-full bg-white">
+            <MessageList />
+            <SendMessage threadId={threadId} />
+          </div>
+        )}
       </div>
-    </div>
+    </Page>
   );
 };

@@ -1,5 +1,39 @@
 {
+  "common": {
+    "error": "There was an error. Please try again.",
+    "message": {
+      "create": "Write your message...",
+      "delete": "Are you sure you want to delete this message? This operation cannot be undone.",
+      "update": "Change your message's text",
+      "text": "Message text",
+      "deleted": "This message was deleted",
+      "updatedAt": "Updated at {{ datetime }}",
+      "deletedAt": "Deleted at {{ datetime }}"
+    },
+    "thread": {
+      "create": "Choose a title for your new thread",
+      "delete": "Are you sure you want to delete this thread? This operation cannot be undone.",
+      "update": "Change your thread's title",
+      "title": "Title"
+    },
+    "button": {
+      "createThread": "New Thread",
+      "cancel": "Cancel",
+      "save": "Save",
+      "logout": "Logout",
+      "menu": "Menu",
+      "send": "Send",
+      "resend": "Resend",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
   "pages": {
+    "login": {
+      "email": "Email",
+      "button": "Login",
+      "error": "Invalid email"
+    },
     "home": {
       "title": "Edit <0>Home.tsx</0> and save to reload.",
       "link": "Learn React"
