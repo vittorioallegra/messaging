@@ -42,7 +42,7 @@ export const ThreadDeleteModal = ({ isOpen, thread, onClose }: ThreadDeleteModal
     >
       <div className="flex flex-col">
         <p>{t('common.thread.delete')}</p>
-        {hasError && <p className="text-red-500">{t('common.error')}</p>}
+        {hasError && <p className="text-red-500">{t('common.error.generic')}</p>}
       </div>
     </Modal>
   );

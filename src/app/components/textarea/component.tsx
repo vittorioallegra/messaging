@@ -1,17 +1,15 @@
-import classNames from 'classnames';
-import { ChangeEvent, useCallback, useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
+import { ChangeEvent, useCallback, useEffect, useId, useRef } from 'react';
 
-interface TextAreaProps {
-  className?: string;
+import { Field, FieldProps } from '../field';
+
+interface TextAreaProps extends FieldProps {
   placeholder?: string;
-  error?: boolean;
   value: string;
   onChange: (value: string) => void;
 }
 
-export const TextArea = ({ className, placeholder, error, value, onChange }: TextAreaProps) => {
-  const { t } = useTranslation();
+export const TextArea = ({ placeholder, value, onChange, ...props }: TextAreaProps) => {
+  const id = useId();
   const ref = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -32,15 +30,15 @@ export const TextArea = ({ className, placeholder, error, value, onChange }: Tex
   );
 
   return (
-    <div className={classNames('flex', className)}>
+    <Field {...props}>
       <textarea
+        id={id}
         ref={ref}
         className="w-full border rounded p-2 border-gray-500 resize-none"
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
       />
-      {error && <span className="text-red-500 mt-3">{t('common.error')}</span>}
-    </div>
+    </Field>
   );
 };

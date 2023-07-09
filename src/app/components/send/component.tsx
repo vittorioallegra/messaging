@@ -32,15 +32,12 @@ export const SendMessage = ({ threadId }: SendMessageProps) => {
   }
 
   return (
-    <div className="flex items-center gap-4 min-h-[2rem] bg-gray-200 p-2">
-      <TextArea
-        className="w-full"
-        placeholder={t('common.message.create')}
-        error={hasError}
-        value={text}
-        onChange={setText}
-      />
-      <Button onClick={handleClick} title={t(`common.button.${hasError ? 'resend' : 'send'}`)} />
+    <div className="flex flex-col min-h-[2rem] bg-gray-200 p-2">
+      <div className="w-full flex items-center gap-4">
+        <TextArea className="w-full" placeholder={t('common.message.create')} value={text} onChange={setText} />
+        <Button onClick={handleClick} title={t(`common.button.${hasError ? 'resend' : 'send'}`)} />
+      </div>
+      {hasError && <span className="text-red-500 mt-1">{t('common.error.message')}</span>}
     </div>
   );
 };

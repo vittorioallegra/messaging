@@ -8,33 +8,10 @@ export interface WebSocketSubscription {
   };
 }
 
-export const messageTypes = ['MESSAGE_CREATED', 'MESSAGE_CREATED', 'MESSAGE_DELETED'];
-
-interface WebSocketMessageCreatePayload {
-  threadId: string;
-  message: Message;
+export interface WebSocketMessage {
+  type: 'MESSAGE_CREATED';
+  payload: {
+    threadId: string;
+    message: Message;
+  };
 }
-
-interface WebSocketMessageUpdatePayload {
-  threadId: string;
-  message: Message;
-}
-
-interface WebSocketMessageDeletePayload {
-  threadId: string;
-  messageId: string;
-}
-
-export type WebSocketMessage =
-  | {
-      type: 'MESSAGE_CREATED';
-      payload: WebSocketMessageCreatePayload;
-    }
-  | {
-      type: 'MESSAGE_UPDATED';
-      payload: WebSocketMessageUpdatePayload;
-    }
-  | {
-      type: 'MESSAGE_DELETED';
-      payload: WebSocketMessageDeletePayload;
-    };

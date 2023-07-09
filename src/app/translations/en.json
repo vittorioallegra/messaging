@@ -1,6 +1,9 @@
 {
   "common": {
-    "error": "There was an error. Please try again.",
+    "error": {
+      "generic": "There was an error. Please try again.",
+      "message": "Your message was not sent. Please try again."
+    },
     "message": {
       "create": "Write your message...",
       "delete": "Are you sure you want to delete this message? This operation cannot be undone.",

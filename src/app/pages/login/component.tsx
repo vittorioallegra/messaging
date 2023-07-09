@@ -19,8 +19,14 @@ export const Login = () => {
     <Page>
       <div className="flex flex-col items-center justify-center h-full">
         <div className="flex flex-col rounded bg-white min-w-[300px] max-w-xs p-4">
-          <Input className="mb-3" placeholder={t('pages.login.email')} value={email} onChange={setEmail} />
-          {hasLoginError && <p className="text-red-400">{t('pages.login.error')}</p>}
+          <Input
+            className="mb-3"
+            placeholder={t('pages.login.email')}
+            value={email}
+            error={hasLoginError}
+            errorMessage={t('pages.login.error')}
+            onChange={setEmail}
+          />
           <Button className="w-full" title={t('pages.login.button')} onClick={handleClick} />
         </div>
       </div>

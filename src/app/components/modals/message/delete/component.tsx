@@ -42,7 +42,7 @@ export const MessageDeleteModal = ({ isOpen, message, onClose }: MessageDeleteMo
     >
       <div className="flex flex-col">
         <p>{t('common.message.delete')}</p>
-        {hasError && <p className="text-red-500">{t('common.error')}</p>}
+        {hasError && <p className="text-red-500">{t('common.error.generic')}</p>}
       </div>
     </Modal>
   );

@@ -1,17 +1,15 @@
-import classNames from 'classnames';
-import { ChangeEvent, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { ChangeEvent, useCallback, useId } from 'react';
 
-interface InputProps {
-  className?: string;
+import { Field, FieldProps } from '../field';
+
+interface InputProps extends FieldProps {
   placeholder?: string;
-  error?: boolean;
   value: string;
   onChange: (value: string) => void;
 }
 
-export const Input = ({ className, placeholder, error, value, onChange }: InputProps) => {
-  const { t } = useTranslation();
+export const Input = ({ placeholder, value, onChange, ...props }: InputProps) => {
+  const id = useId();
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -21,14 +19,14 @@ export const Input = ({ className, placeholder, error, value, onChange }: InputP
   );
 
   return (
-    <div className={classNames('flex', className)}>
+    <Field {...props}>
       <input
+        id={id}
         className="w-full border rounded p-2 border-gray-500"
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
       />
-      {error && <span className="text-red-500 mt-3">{t('common.error')}</span>}
-    </div>
+    </Field>
   );
 };
