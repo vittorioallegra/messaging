@@ -3,7 +3,7 @@ import { format, parseISO } from 'date-fns';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useAuth } from '../../../../contexts';
+import { useAuth, useMessages } from '../../../../contexts';
 import { Message, User } from '../../../../interfaces';
 import { Button } from '../../../button';
 import { ContextMenu } from '../../../contextmenu';
@@ -16,10 +16,13 @@ interface MessageBubbleProps {
 export const MessageBubble = ({ message }: MessageBubbleProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { colorForMessage } = useMessages();
   const [isContextMenuOpen, setContextMenuOpen] = useState(false);
   const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  const color = useMemo(() => colorForMessage(message), [message, colorForMessage]);
 
   const messageUser: Pick<User, 'id' | 'firstName' | 'lastName'> = useMemo(
     () => JSON.parse(message.displayName),
@@ -77,42 +80,71 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
   return (
     <div
       ref={ref}
-      className={classNames('relative min-h-[2rem]  max-w-[calc(100%-3rem)]', {
+      className={classNames('relative min-h-[2rem] flex flex-col max-w-[calc(100%-3rem)]', {
         'ml-auto': isUserMessage,
         'mr-auto': !isUserMessage,
       })}
       onContextMenu={openContextMenu}
     >
       <div
-        className={classNames('flex gap-2 items-center rounded-full border border-gray-800', {
-          'px-2': isUserMessage,
-          'pl-0.5 pr-4': !isUserMessage,
+        className={classNames({
+          'ml-auto': isUserMessage,
+          'mr-auto': !isUserMessage,
         })}
       >
-        {!isUserMessage && (
-          <div className="flex items-center justify-center rounded-full border border-gray-300 p-1 w-10 h-10">
-            {avatar}
-          </div>
-        )}
         <div
-          className={classNames({
-            'w-full': isUserMessage,
-            'w-[calc(100%-2.5rem)]': !isUserMessage,
+          className={classNames('flex gap-2 items-center rounded-full border', {
+            'px-2 border-black': isUserMessage,
+            'pl-0.5 pr-4': !isUserMessage,
           })}
+          style={
+            !isUserMessage
+              ? {
+                  borderColor: color,
+                }
+              : undefined
+          }
         >
-          {!isUserMessage && <p className="text-sm text-gray-500">{name}</p>}
-          <p
+          {!isUserMessage && (
+            <div
+              className="flex items-center justify-center rounded-full border p-1 w-10 h-10"
+              style={{
+                borderColor: color,
+                color,
+              }}
+            >
+              {avatar}
+            </div>
+          )}
+          <div
             className={classNames({
-              'text-right': isUserMessage,
+              'w-full': isUserMessage,
+              'w-[calc(100%-2.5rem)]': !isUserMessage,
             })}
           >
-            {isMessageDeleted ? t('common.message.deleted') : message.text}
-          </p>
+            {!isUserMessage && (
+              <p
+                className="text-sm"
+                style={{
+                  color,
+                }}
+              >
+                {name}
+              </p>
+            )}
+            <p
+              className={classNames({
+                'text-right': isUserMessage,
+              })}
+            >
+              {isMessageDeleted ? t('common.message.deleted') : message.text}
+            </p>
+          </div>
+          <ContextMenu isOpen={isContextMenuOpen} triggerRef={ref} onClose={closeContextMenu}>
+            <Button onClick={openUpdateModal} title={t('common.button.edit')} />
+            <Button onClick={openDeleteModal} title={t('common.button.delete')} />
+          </ContextMenu>
         </div>
-        <ContextMenu isOpen={isContextMenuOpen} triggerRef={ref} onClose={closeContextMenu}>
-          <Button onClick={openUpdateModal} title={t('common.button.edit')} />
-          <Button onClick={openDeleteModal} title={t('common.button.delete')} />
-        </ContextMenu>
       </div>
       <div
         className={classNames('text-xs', {

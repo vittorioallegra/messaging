@@ -1,39 +1,56 @@
 import { PropsWithChildren, createContext, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
 import { messageDeleted, messageUpdated, messagesReceived, messagesReducer, selectMessages } from '../features';
-import { Message, MessageList, WebSocketMessage, WebSocketSubscription } from '../interfaces';
+import { Message, MessageList, User, WebSocketMessage, WebSocketSubscription } from '../interfaces';
 import { Store, createUseContext } from '../utils';
 
-// properties that provides this context
-interface WebSocketContextProps {
+interface MessagesContextProps {
   messages: Message[];
   threadId?: string;
   connect: (threadId: string) => void;
+  colorForMessage: (message: Message) => string;
   receivedMessages: (messages: Message[], threadId: string) => void;
   updateMessage: (message: Message) => void;
   deleteMessage: (message: Message) => void;
   disconnect: () => void;
 }
 
-const WebSocketContext = createContext<null | WebSocketContextProps>(null);
-WebSocketContext.displayName = 'WebSocket Context';
+const MessagesContext = createContext<null | MessagesContextProps>(null);
+MessagesContext.displayName = 'Messages Context';
 
-type WebSocketProviderProps = PropsWithChildren<{
-  authorization: string;
-}>;
-
-export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
+export const MessagesProvider = ({ children }: PropsWithChildren) => {
   const [store] = useState(new Store<MessageList>('messages'));
   const [websocket, setWebSocket] = useState<WebSocket | undefined>(undefined);
   const [messageList, dispatch] = useReducer(messagesReducer, {}, () => store.getItem() ?? {});
   const [threadId, setThreadId] = useState<string | undefined>(undefined);
+  const [userColors, setUserColors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     store.setItem(messageList);
     // eslint-disable-next-line
   }, [messageList]);
 
-  const messages = useMemo(() => selectMessages(messageList, threadId), [messageList, threadId]);
+  const messages = useMemo(() => {
+    const messages = selectMessages(messageList, threadId);
+    messages.forEach(({ displayName }) => {
+      const { id }: User = JSON.parse(displayName);
+      if (!(id in userColors)) {
+        setUserColors((userColors) => ({
+          ...userColors,
+          [id]: '#' + ('000000' + ((Math.random() * 0xffffff) << 0).toString(16)).slice(-6),
+        }));
+      }
+    });
+    return messages;
+  }, [messageList, threadId, userColors]);
+
+  const colorForMessage = useCallback(
+    (message: Message) => {
+      const { id }: User = JSON.parse(message.displayName);
+      return userColors[id];
+    },
+    [userColors],
+  );
 
   const disconnect = useCallback(() => {
     if (websocket) {
@@ -94,11 +111,12 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   );
 
   return (
-    <WebSocketContext.Provider
+    <MessagesContext.Provider
       value={{
         messages,
         threadId,
         connect,
+        colorForMessage,
         receivedMessages,
         updateMessage,
         deleteMessage,
@@ -106,8 +124,8 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       }}
     >
       {children}
-    </WebSocketContext.Provider>
+    </MessagesContext.Provider>
   );
 };
 
-export const useWebSocket = createUseContext(WebSocketContext);
+export const useMessages = createUseContext(MessagesContext);

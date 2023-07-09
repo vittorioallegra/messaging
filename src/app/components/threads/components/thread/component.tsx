@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useApp, useAuth, useWebSocket } from '../../../../contexts';
+import { useApp, useAuth, useMessages } from '../../../../contexts';
 import { Thread } from '../../../../interfaces';
 import { Button } from '../../../button';
 import { ContextMenu } from '../../../contextmenu';
@@ -17,7 +17,7 @@ export const ThreadButton = ({ thread, onClick }: ThreadButtonProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toggleThreadsSidebar } = useApp();
-  const { connect, threadId } = useWebSocket();
+  const { connect, threadId } = useMessages();
   const [isContextMenuOpen, setContextMenuOpen] = useState(false);
   const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);

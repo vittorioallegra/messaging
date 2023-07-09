@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useApp } from '../../contexts/AppContext';
+import { useApp } from '../../contexts';
 import { useInterval } from '../../hooks';
 import { Button } from '../button';
 import { ThreadCreateModal } from '../modals';

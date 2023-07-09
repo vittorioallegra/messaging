@@ -3,7 +3,7 @@ import { PropsWithChildren, createContext, useCallback, useState } from 'react';
 import { AppApi } from '../apis';
 import { Thread, User } from '../interfaces';
 import { createUseContext } from '../utils';
-import { useWebSocket } from './WebSocketContext';
+import { useMessages } from './messages';
 
 interface AppContextProps {
   threads: Thread[];
@@ -31,7 +31,7 @@ export const AppProvider = ({ user, children }: AppProviderProps) => {
     updateMessage: updateWebSocketMessage,
     deleteMessage: deleteWebSocketMessage,
     receivedMessages,
-  } = useWebSocket();
+  } = useMessages();
   const [api] = useState(new AppApi(user.id));
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isThreadsSidebarOpen, setThreadsSidebarOpen] = useState(false);

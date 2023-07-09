@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 
 import { MessageList, NavBar, Page, SendMessage, ThreadsSidebar } from '../../components';
-import { useApp, useWebSocket } from '../../contexts';
+import { useApp, useMessages } from '../../contexts';
 
 export const Home = () => {
   const { fetchThreads } = useApp();
-  const { threadId } = useWebSocket();
+  const { threadId } = useMessages();
 
   useEffect(() => {
     fetchThreads();

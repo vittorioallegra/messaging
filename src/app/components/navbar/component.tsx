@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useApp, useAuth, useWebSocket } from '../../contexts';
+import { useApp, useAuth, useMessages } from '../../contexts';
 import { Button } from '../button';
 
 export const NavBar = () => {
   const { logout } = useAuth();
   const { toggleThreadsSidebar } = useApp();
-  const { disconnect } = useWebSocket();
+  const { disconnect } = useMessages();
   const { t } = useTranslation();
 
   const handleLogout = useCallback(() => {

@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { useAuth, useWebSocket } from '../../contexts';
+import { useAuth, useMessages } from '../../contexts';
 import { Message } from '../../interfaces';
 import { MessageUpdateModal } from '../modals';
 import { MessageBubble } from './components';
 
 export const MessageList = () => {
   const { user } = useAuth();
-  const { messages } = useWebSocket();
+  const { messages } = useMessages();
   const [message, setMessage] = useState<Message | undefined>(undefined);
 
   const openModal = useCallback(
