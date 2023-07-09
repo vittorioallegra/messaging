@@ -1,36 +1,35 @@
-import { formatISO } from 'date-fns';
+import { createReducer } from '@reduxjs/toolkit';
 
-import { MessageList, WebSocketMessage } from '../../interfaces';
+import { MessageList } from '../../interfaces';
+import * as actions from './actions';
 
 const initialState: MessageList = {};
 
-export const messagesReducer = (state: MessageList = initialState, action: WebSocketMessage): MessageList => {
-  switch (action.type) {
-    case 'MESSAGE_CREATED':
-      return {
-        ...state,
-        [action.payload.threadId]: [...(state[action.payload.threadId] ?? []), action.payload.message],
-      };
-    case 'MESSAGE_UPDATED':
-      return {
-        ...state,
-        [action.payload.threadId]: (state[action.payload.threadId] ?? []).map((it) =>
-          it.id === action.payload.message.id ? action.payload.message : it,
-        ),
-      };
-    case 'MESSAGE_DELETED':
-      return {
-        ...state,
-        [action.payload.threadId]: (state[action.payload.threadId] ?? []).map((it) =>
-          it.id === action.payload.messageId
-            ? {
-                ...it,
-                deletedAt: formatISO(Date.now()),
-              }
-            : it,
-        ),
-      };
-    default:
-      return state;
-  }
-};
+export const messagesReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(actions.messagesReceived, (state, action) => {
+      const { messages, threadId } = action.payload;
+      const currentMessages = state[threadId] ?? [];
+      const messageIds = currentMessages.map(({ id }) => id);
+      const newMessages = messages.filter(({ id }) => !messageIds.includes(id));
+      state[threadId] = [
+        ...currentMessages.map((it) => {
+          const message = messages.find(({ id }) => id === it.id);
+          return message ?? it;
+        }),
+        ...newMessages,
+      ];
+    })
+    .addCase(actions.messageCreated, (state, action) => {
+      const { message, threadId } = action.payload;
+      state[threadId] = [...(state[threadId] ?? []), message];
+    })
+    .addCase(actions.messageUpdated, (state, action) => {
+      const { message, threadId } = action.payload;
+      state[threadId] = (state[threadId] ?? []).map((it) => (it.id === message.id ? message : it));
+    })
+    .addCase(actions.messageDeleted, (state, action) => {
+      const { message, threadId } = action.payload;
+      state[threadId] = (state[threadId] ?? []).map((it) => (it.id === message.id ? message : it));
+    });
+});

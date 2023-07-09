@@ -6,7 +6,7 @@ export class AppApi extends BaseApi {
   private userId: string;
 
   constructor(userId: string) {
-    super('0de37435-b9ea-4f67-b25a-a879846fa27d');
+    super('a96f26a2-bdf1-47f0-a654-0cf528d1cf91');
     this.userId = userId;
   }
 
@@ -31,30 +31,14 @@ export class AppApi extends BaseApi {
   };
 
   createMessage = async (body: CreateMessage): Promise<Message> => {
-    try {
-      const message: Message = await this.post(AppEndpoint.createMessage(), body);
-      return Promise.resolve({
-        ...message,
-        checkSum: this.userId,
-      });
-    } catch {
-      return Promise.reject();
-    }
+    return this.post(AppEndpoint.createMessage(), body);
   };
 
   updateMessage = async (id: string, text: string): Promise<Message> => {
-    try {
-      const message: Message = await this.patch(AppEndpoint.updateMessage(id), { text });
-      return Promise.resolve({
-        ...message,
-        checkSum: this.userId,
-      });
-    } catch {
-      return Promise.reject();
-    }
+    return this.patch(AppEndpoint.updateMessage(id), { text });
   };
 
-  deleteMessage = (id: string): Promise<boolean> => {
-    return this.delete(AppEndpoint.deleteMessage(id));
+  deleteMessage = (id: string): Promise<Message> => {
+    return this.patch(AppEndpoint.updateMessage(id), { text: 'common.message.deleted' });
   };
 }

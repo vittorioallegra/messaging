@@ -21,16 +21,22 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const isUserMessage = useMemo(() => message.checkSum === user?.id, [message.checkSum, user?.id]);
+  const messageUser: Pick<User, 'id' | 'firstName' | 'lastName'> = useMemo(
+    () => JSON.parse(message.displayName),
+    [message.displayName],
+  );
+
+  const isUserMessage = useMemo(() => messageUser.id === user?.id, [messageUser, user?.id]);
+  const isMessageDeleted = useMemo(() => message.text === 'common.message.deleted', [message.text]);
 
   const openContextMenu = useCallback(
     (e: React.MouseEvent) => {
-      if (isUserMessage && !message.deletedAt) {
+      if (isUserMessage && !isMessageDeleted) {
         e.preventDefault();
         setContextMenuOpen(true);
       }
     },
-    [isUserMessage, message.deletedAt],
+    [isUserMessage, isMessageDeleted],
   );
   const closeContextMenu = useCallback(() => setContextMenuOpen(false), []);
 
@@ -46,37 +52,32 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
   }, [closeContextMenu]);
   const closeDeleteModal = useCallback(() => setDeleteModalOpen(false), []);
 
-  const displayName: Pick<User, 'firstName' | 'lastName'> = useMemo(
-    () => JSON.parse(message.displayName),
-    [message.displayName],
-  );
-
   const avatar = useMemo(() => {
-    const first = displayName.firstName.substring(0, 1).toUpperCase();
-    const last = displayName.lastName.substring(0, 1).toUpperCase();
+    const first = messageUser.firstName.substring(0, 1).toUpperCase();
+    const last = messageUser.lastName.substring(0, 1).toUpperCase();
     return `${first}${last}`;
-  }, [displayName]);
+  }, [messageUser]);
 
   const name = useMemo(() => {
-    return `${displayName.firstName} ${displayName.lastName}`;
-  }, [displayName]);
+    return `${messageUser.firstName} ${messageUser.lastName}`;
+  }, [messageUser]);
 
   const getDateTime = useCallback((isoDateTime: string) => format(parseISO(isoDateTime), 'dd.MM.yyyy HH:mm'), []);
 
   const datetime = useMemo(() => {
-    if (message.deletedAt) {
-      return t('common.message.deletedAt', { datetime: getDateTime(message.deletedAt) });
+    if (isMessageDeleted) {
+      return t('common.message.deletedAt', { datetime: getDateTime(message.updatedAt) });
     }
     if (message.createdAt !== message.updatedAt) {
       return t('common.message.updatedAt', { datetime: getDateTime(message.updatedAt) });
     }
     return getDateTime(message.createdAt);
-  }, [message, getDateTime, t]);
+  }, [isMessageDeleted, message, getDateTime, t]);
 
   return (
     <div
       ref={ref}
-      className={classNames('relative min-h-[30px] max-w-[calc(100%-50px)]', {
+      className={classNames('relative min-h-[2rem]  max-w-[calc(100%-3rem)]', {
         'ml-auto': isUserMessage,
         'mr-auto': !isUserMessage,
       })}
@@ -96,7 +97,7 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
         <div
           className={classNames({
             'w-full': isUserMessage,
-            'w-[calc(100%-40px)]': !isUserMessage,
+            'w-[calc(100%-2.5rem)]': !isUserMessage,
           })}
         >
           {!isUserMessage && <p className="text-sm text-gray-500">{name}</p>}
@@ -105,7 +106,7 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
               'text-right': isUserMessage,
             })}
           >
-            {message.deletedAt ? t('common.message.deleted') : message.text}
+            {isMessageDeleted ? t('common.message.deleted') : message.text}
           </p>
         </div>
         <ContextMenu isOpen={isContextMenuOpen} triggerRef={ref} onClose={closeContextMenu}>
@@ -113,7 +114,13 @@ export const MessageBubble = ({ message }: MessageBubbleProps) => {
           <Button onClick={openDeleteModal} title={t('common.button.delete')} />
         </ContextMenu>
       </div>
-      <div className="text-xs">{datetime}</div>
+      <div
+        className={classNames('text-xs', {
+          'text-right': isUserMessage,
+        })}
+      >
+        {datetime}
+      </div>
       <MessageUpdateModal isOpen={isUpdateModalOpen} message={message} onClose={closeUpdateModal} />
       <MessageDeleteModal isOpen={isDeleteModalOpen} message={message} onClose={closeDeleteModal} />
     </div>

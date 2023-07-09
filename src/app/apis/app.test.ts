@@ -60,10 +60,7 @@ describe('AppApi', () => {
 
     const message = await appApi.createMessage(mockCreateMessage);
     expect(mockedAxios.post).toHaveBeenCalledWith(AppEndpoint.createMessage().toString(), mockCreateMessage, undefined);
-    expect(message).toEqual({
-      ...mockMessage,
-      checkSum: 'auth',
-    });
+    expect(message).toEqual(mockMessage);
   });
 
   it('updateMessage', async () => {
@@ -77,17 +74,20 @@ describe('AppApi', () => {
       { text },
       undefined,
     );
-    expect(message).toEqual({
-      ...resultMessage,
-      checkSum: 'auth',
-    });
+    expect(message).toEqual(resultMessage);
   });
 
   it('deleteMessage', async () => {
-    mockedAxios.delete.mockResolvedValueOnce(true);
+    const text = 'common.message.deleted';
+    const resultMessage = { ...mockMessage, text };
+    mockedAxios.patch.mockResolvedValueOnce(resultMessage);
 
-    const result = await appApi.deleteMessage(mockMessage.id);
-    expect(mockedAxios.delete).toHaveBeenCalledWith(AppEndpoint.deleteMessage(mockMessage.id).toString(), undefined);
-    expect(result).toBe(true);
+    const message = await appApi.updateMessage(mockMessage.id, text);
+    expect(mockedAxios.patch).toHaveBeenCalledWith(
+      AppEndpoint.deleteMessage(mockMessage.id).toString(),
+      { text },
+      undefined,
+    );
+    expect(message).toEqual(resultMessage);
   });
 });

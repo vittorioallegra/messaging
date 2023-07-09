@@ -10,9 +10,10 @@ import { ThreadDeleteModal, ThreadUpdateModal } from '../../../modals';
 
 interface ThreadButtonProps {
   thread: Thread;
+  onClick: (threadId: string) => void;
 }
 
-export const ThreadButton = ({ thread }: ThreadButtonProps) => {
+export const ThreadButton = ({ thread, onClick }: ThreadButtonProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { toggleThreadsSidebar } = useApp();
@@ -48,7 +49,8 @@ export const ThreadButton = ({ thread }: ThreadButtonProps) => {
   const handleClick = useCallback(() => {
     toggleThreadsSidebar();
     connect(thread.id);
-  }, [toggleThreadsSidebar, thread.id, connect]);
+    onClick(thread.id);
+  }, [toggleThreadsSidebar, thread.id, connect, onClick]);
 
   return (
     <div ref={ref} className="relative border-b border-black" onContextMenu={openContextMenu}>

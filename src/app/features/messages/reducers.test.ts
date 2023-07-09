@@ -1,3 +1,4 @@
+import { getType } from '@reduxjs/toolkit';
 import { formatISO } from 'date-fns';
 
 import { mockMessage, mockThread } from '../../mocks';
@@ -5,15 +6,25 @@ import * as actions from './actions';
 import { messagesReducer } from './reducers';
 
 describe('Messages Reducer', () => {
-  it('MESSAGE_CREATED', () => {
+  it(`${getType(actions.messagesReceived)}`, () => {
     const state = {};
-    expect(messagesReducer(state, actions.messageCreated(mockMessage, mockThread.id))).toEqual({
+    expect(
+      messagesReducer(state, actions.messagesReceived({ messages: [mockMessage], threadId: mockThread.id })),
+    ).toEqual({
       ...state,
       [mockThread.id]: [mockMessage],
     });
   });
 
-  it('MESSAGE_UPDATED', () => {
+  it(`${getType(actions.messageCreated)}`, () => {
+    const state = {};
+    expect(messagesReducer(state, actions.messageCreated({ message: mockMessage, threadId: mockThread.id }))).toEqual({
+      ...state,
+      [mockThread.id]: [mockMessage],
+    });
+  });
+
+  it(`${getType(actions.messageUpdated)}`, () => {
     const state = {
       [mockThread.id]: [mockMessage],
     };
@@ -21,24 +32,28 @@ describe('Messages Reducer', () => {
       ...mockMessage,
       updatedAt: formatISO(Date.now()),
     };
-    expect(messagesReducer(state, actions.messageUpdated(messageUpdated, mockThread.id))).toEqual({
+    expect(
+      messagesReducer(state, actions.messageUpdated({ message: messageUpdated, threadId: mockThread.id })),
+    ).toEqual({
       ...state,
       [mockThread.id]: [messageUpdated],
     });
   });
 
-  it('MESSAGE_DELETED', () => {
+  it(`${getType(actions.messageDeleted)}`, () => {
     const state = {
       [mockThread.id]: [mockMessage],
     };
-    expect(messagesReducer(state, actions.messageDeleted(mockMessage.id, mockThread.id))).toEqual({
+    const messageDeleted = {
+      ...mockMessage,
+      text: 'common.message.deleted',
+      updatedAt: formatISO(Date.now()),
+    };
+    expect(
+      messagesReducer(state, actions.messageDeleted({ message: messageDeleted, threadId: mockThread.id })),
+    ).toEqual({
       ...state,
-      [mockThread.id]: [
-        {
-          ...mockMessage,
-          deletedAt: formatISO(Date.now()),
-        },
-      ],
+      [mockThread.id]: [messageDeleted],
     });
   });
 });

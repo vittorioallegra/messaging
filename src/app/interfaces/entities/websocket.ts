@@ -8,6 +8,8 @@ export interface WebSocketSubscription {
   };
 }
 
+export const messageTypes = ['MESSAGE_CREATED', 'MESSAGE_CREATED', 'MESSAGE_DELETED'];
+
 interface WebSocketMessageCreatePayload {
   threadId: string;
   message: Message;

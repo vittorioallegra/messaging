@@ -10,6 +10,7 @@ interface AppContextProps {
   isThreadsSidebarOpen: boolean;
   toggleThreadsSidebar: () => void;
   fetchThreads: () => void;
+  fetchThread: (threadId: string) => void;
   createThread: (title: string) => Promise<void>;
   updateThread: (id: string, title: string) => Promise<void>;
   deleteThread: (id: string) => Promise<void>;
@@ -26,7 +27,11 @@ type AppProviderProps = PropsWithChildren<{
 }>;
 
 export const AppProvider = ({ user, children }: AppProviderProps) => {
-  const { updateMessage: updateWebSocketMessage, deleteMessage: deleteWebSocketMessage } = useWebSocket();
+  const {
+    updateMessage: updateWebSocketMessage,
+    deleteMessage: deleteWebSocketMessage,
+    receivedMessages,
+  } = useWebSocket();
   const [api] = useState(new AppApi(user.id));
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isThreadsSidebarOpen, setThreadsSidebarOpen] = useState(false);
@@ -44,6 +49,24 @@ export const AppProvider = ({ user, children }: AppProviderProps) => {
       return;
     }
   }, [api]);
+
+  const fetchThread = useCallback(
+    async (threadId: string) => {
+      try {
+        const thread = await api.getThread(threadId);
+        setThreads((threads) => {
+          if (threads.find(({ id }) => id === thread.id)) {
+            return threads.map((it) => (it.id === thread.id ? thread : it));
+          }
+          return [...threads, thread];
+        });
+        receivedMessages(thread.messages, thread.id);
+      } catch {
+        return;
+      }
+    },
+    [api, receivedMessages],
+  );
 
   const createThread = useCallback(
     async (title: string) => {
@@ -90,6 +113,7 @@ export const AppProvider = ({ user, children }: AppProviderProps) => {
         await api.createMessage({
           checkSum: user.id,
           displayName: JSON.stringify({
+            id: user.id,
             firstName: user.firstName,
             lastName: user.lastName,
           }),
@@ -101,7 +125,7 @@ export const AppProvider = ({ user, children }: AppProviderProps) => {
         return Promise.reject();
       }
     },
-    [api, user.id, user.firstName, user.lastName],
+    [api, user],
   );
 
   const updateMessage = useCallback(
@@ -120,8 +144,8 @@ export const AppProvider = ({ user, children }: AppProviderProps) => {
   const deleteMessage = useCallback(
     async (id: string) => {
       try {
-        await api.deleteMessage(id);
-        deleteWebSocketMessage(id);
+        const message = await api.deleteMessage(id);
+        deleteWebSocketMessage(message);
         return Promise.resolve();
       } catch {
         return Promise.reject();
@@ -137,6 +161,7 @@ export const AppProvider = ({ user, children }: AppProviderProps) => {
         isThreadsSidebarOpen,
         toggleThreadsSidebar,
         fetchThreads,
+        fetchThread,
         createThread,
         updateThread,
         deleteThread,

@@ -1,27 +1,8 @@
-import { Message, WebSocketMessage } from '../../interfaces';
+import { createAction } from '@reduxjs/toolkit';
 
-export const messageTypes = ['MESSAGE_CREATED', 'MESSAGE_CREATED', 'MESSAGE_DELETED'];
+import { Message } from '../../interfaces';
 
-export const messageCreated = (message: Message, threadId: string): WebSocketMessage => ({
-  type: 'MESSAGE_CREATED',
-  payload: {
-    message,
-    threadId,
-  },
-});
-
-export const messageUpdated = (message: Message, threadId: string): WebSocketMessage => ({
-  type: 'MESSAGE_UPDATED',
-  payload: {
-    message,
-    threadId,
-  },
-});
-
-export const messageDeleted = (messageId: string, threadId: string): WebSocketMessage => ({
-  type: 'MESSAGE_DELETED',
-  payload: {
-    messageId,
-    threadId,
-  },
-});
+export const messagesReceived = createAction<{ messages: Message[]; threadId: string }>('MESSAGES_RECEIVED');
+export const messageCreated = createAction<{ message: Message; threadId: string }>('MESSAGE_CREATED');
+export const messageUpdated = createAction<{ message: Message; threadId: string }>('MESSAGE_UPDATED');
+export const messageDeleted = createAction<{ message: Message; threadId: string }>('MESSAGE_DELETED');

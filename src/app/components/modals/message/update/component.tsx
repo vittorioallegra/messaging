@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useApp } from '../../../../contexts';
@@ -18,29 +18,29 @@ export const MessageUpdateModal = ({ isOpen, message, onClose }: MessageUpdateMo
   const [hasError, setHasError] = useState(false);
   const [text, setText] = useState(message.text);
 
-  const handleClose = useCallback(() => {
-    setText('');
+  useEffect(() => {
     setHasError(false);
-    onClose();
-  }, [onClose]);
+    setText(isOpen ? message.text : '');
+    // eslint-disable-next-line
+  }, [isOpen]);
 
   const handleUpdate = useCallback(async () => {
     if (text.trim().length) {
       setHasError(false);
       try {
         await updateMessage(message.id, text);
-        handleClose();
+        onClose();
       } catch {
         setHasError(true);
       }
     }
-  }, [message.id, text, updateMessage, handleClose]);
+  }, [message.id, text, updateMessage, onClose]);
 
   return (
     <Modal
       isOpen={isOpen}
       title={t('common.message.update')}
-      onClose={handleClose}
+      onClose={onClose}
       action={{
         title: t('common.button.save'),
         onClick: handleUpdate,

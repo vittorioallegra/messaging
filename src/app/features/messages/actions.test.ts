@@ -1,25 +1,34 @@
+import { getType } from '@reduxjs/toolkit';
+
 import { mockMessage, mockThread } from '../../mocks';
 import * as actions from './actions';
 
 describe('Messages Actions', () => {
-  it('MESSAGE_CREATED', () => {
-    expect(actions.messageCreated(mockMessage, mockThread.id)).toEqual({
-      type: 'MESSAGE_CREATED',
+  it(`${getType(actions.messagesReceived)}`, () => {
+    expect(actions.messagesReceived({ messages: [mockMessage], threadId: mockThread.id })).toEqual({
+      type: getType(actions.messagesReceived),
+      payload: { messages: [mockMessage], threadId: mockThread.id },
+    });
+  });
+
+  it(`${getType(actions.messageCreated)}`, () => {
+    expect(actions.messageCreated({ message: mockMessage, threadId: mockThread.id })).toEqual({
+      type: getType(actions.messageCreated),
       payload: { message: mockMessage, threadId: mockThread.id },
     });
   });
 
-  it('MESSAGE_UPDATED', () => {
-    expect(actions.messageUpdated(mockMessage, mockThread.id)).toEqual({
-      type: 'MESSAGE_UPDATED',
+  it(`${getType(actions.messageUpdated)}`, () => {
+    expect(actions.messageUpdated({ message: mockMessage, threadId: mockThread.id })).toEqual({
+      type: getType(actions.messageUpdated),
       payload: { message: mockMessage, threadId: mockThread.id },
     });
   });
 
-  it('MESSAGE_DELETED', () => {
-    expect(actions.messageDeleted(mockMessage.id, mockThread.id)).toEqual({
-      type: 'MESSAGE_DELETED',
-      payload: { messageId: mockMessage.id, threadId: mockThread.id },
+  it(`${getType(actions.messageDeleted)}`, () => {
+    expect(actions.messageDeleted({ message: mockMessage, threadId: mockThread.id })).toEqual({
+      type: getType(actions.messageDeleted),
+      payload: { message: mockMessage, threadId: mockThread.id },
     });
   });
 });

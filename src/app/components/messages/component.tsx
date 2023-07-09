@@ -29,7 +29,7 @@ export const MessageList = () => {
   }, []);
 
   return (
-    <div className="w-full h-full flex-1 p-2 flex flex-col gap-2 bg-white">
+    <div className="w-full h-full overflow-y-auto flex-1 p-2 flex flex-col gap-2 bg-white">
       {messages.map((it) => (
         <MessageBubble key={it.id} message={it} />
       ))}

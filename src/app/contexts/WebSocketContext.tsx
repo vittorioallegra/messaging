@@ -1,6 +1,6 @@
 import { PropsWithChildren, createContext, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
-import { messageDeleted, messageTypes, messageUpdated, messagesReducer, selectMessages } from '../features';
+import { messageDeleted, messageUpdated, messagesReceived, messagesReducer, selectMessages } from '../features';
 import { Message, MessageList, WebSocketMessage, WebSocketSubscription } from '../interfaces';
 import { Store, createUseContext } from '../utils';
 
@@ -9,8 +9,9 @@ interface WebSocketContextProps {
   messages: Message[];
   threadId?: string;
   connect: (threadId: string) => void;
+  receivedMessages: (messages: Message[], threadId: string) => void;
   updateMessage: (message: Message) => void;
-  deleteMessage: (id: string) => void;
+  deleteMessage: (message: Message) => void;
   disconnect: () => void;
 }
 
@@ -21,7 +22,7 @@ type WebSocketProviderProps = PropsWithChildren<{
   authorization: string;
 }>;
 
-export const WebSocketProvider = ({ authorization, children }: WebSocketProviderProps) => {
+export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [store] = useState(new Store<MessageList>('messages'));
   const [websocket, setWebSocket] = useState<WebSocket | undefined>(undefined);
   const [messageList, dispatch] = useReducer(messagesReducer, {}, () => store.getItem() ?? {});
@@ -32,9 +33,7 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
     // eslint-disable-next-line
   }, [messageList]);
 
-  const messages = useMemo(() => {
-    return selectMessages(messageList, threadId);
-  }, [messageList, threadId]);
+  const messages = useMemo(() => selectMessages(messageList, threadId), [messageList, threadId]);
 
   const disconnect = useCallback(() => {
     if (websocket) {
@@ -52,7 +51,7 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
         const websocketSubscription: WebSocketSubscription = {
           type: 'THREAD_SUBSCRIPTION',
           payload: {
-            authorization,
+            authorization: 'a96f26a2-bdf1-47f0-a654-0cf528d1cf91',
             threadId,
           },
         };
@@ -60,40 +59,38 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
       };
       socket.onmessage = (event) => {
         const message: WebSocketMessage = JSON.parse(event.data);
-        if (messageTypes.includes(message.type)) {
+        if (message.type === 'MESSAGE_CREATED') {
           dispatch(message);
         }
       };
       setWebSocket(socket);
       setThreadId(threadId);
     },
-    [authorization, disconnect, dispatch],
+    [disconnect, dispatch],
   );
+
+  const receivedMessages = useCallback((messages: Message[], threadId: string) => {
+    dispatch(messagesReceived({ messages, threadId }));
+  }, []);
 
   const updateMessage = useCallback(
     (message: Message) => {
       if (threadId) {
-        const websocketMessage = messageUpdated(message, threadId);
+        const websocketMessage = messageUpdated({ message, threadId });
         dispatch(websocketMessage);
-        if (websocket) {
-          websocket.send(JSON.stringify(websocketMessage));
-        }
       }
     },
-    [threadId, dispatch, websocket],
+    [threadId, dispatch],
   );
 
   const deleteMessage = useCallback(
-    (messageId: string) => {
+    (message: Message) => {
       if (threadId) {
-        const websocketMessage = messageDeleted(messageId, threadId);
+        const websocketMessage = messageDeleted({ message, threadId });
         dispatch(websocketMessage);
-        if (websocket) {
-          websocket.send(JSON.stringify(websocketMessage));
-        }
       }
     },
-    [threadId, dispatch, websocket],
+    [threadId, dispatch],
   );
 
   return (
@@ -102,6 +99,7 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
         messages,
         threadId,
         connect,
+        receivedMessages,
         updateMessage,
         deleteMessage,
         disconnect,

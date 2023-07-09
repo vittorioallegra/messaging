@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useApp } from '../../../../contexts';
@@ -18,29 +18,29 @@ export const ThreadUpdateModal = ({ isOpen, thread, onClose }: ThreadUpdateModal
   const [hasError, setHasError] = useState(false);
   const [title, setTitle] = useState(thread.title);
 
-  const handleClose = useCallback(() => {
-    setTitle('');
+  useEffect(() => {
     setHasError(false);
-    onClose();
-  }, [onClose]);
+    setTitle(isOpen ? thread.title : '');
+    // eslint-disable-next-line
+  }, [isOpen]);
 
   const handleUpdate = useCallback(async () => {
     if (title.trim().length) {
       setHasError(false);
       try {
         await updateThread(thread.id, title);
-        handleClose();
+        onClose();
       } catch {
         setHasError(true);
       }
     }
-  }, [thread.id, title, updateThread, handleClose]);
+  }, [thread.id, title, updateThread, onClose]);
 
   return (
     <Modal
       isOpen={isOpen}
       title={t('common.thread.update')}
-      onClose={handleClose}
+      onClose={onClose}
       action={{
         title: t('common.button.save'),
         onClick: handleUpdate,

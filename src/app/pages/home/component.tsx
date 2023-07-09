@@ -15,10 +15,10 @@ export const Home = () => {
   return (
     <Page>
       <NavBar />
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-[calc(100%-3rem)]">
         <ThreadsSidebar />
         {threadId && (
-          <div className="flex flex-col max-md:w-full md:w-[calc(100%-320px)] h-full bg-white">
+          <div className="flex flex-col max-md:w-full md:w-[calc(100%-20rem)] h-full bg-white">
             <MessageList />
             <SendMessage threadId={threadId} />
           </div>
