@@ -2,7 +2,7 @@ import axios, { AxiosStatic } from 'axios';
 
 import { mockCreateMessage, mockMessage, mockThread } from '../mocks';
 import { AppApi } from './app';
-import { ApiEndpoint } from './utils';
+import { AppEndpoint } from './utils';
 
 describe('AppApi', () => {
   const mockedAxios = axios as jest.Mocked<AxiosStatic>;
@@ -12,7 +12,7 @@ describe('AppApi', () => {
     mockedAxios.get.mockResolvedValueOnce([mockThread]);
 
     const threads = await appApi.getThreads();
-    expect(mockedAxios.get).toHaveBeenCalledWith(ApiEndpoint.getThreads().toString(), undefined);
+    expect(mockedAxios.get).toHaveBeenCalledWith(AppEndpoint.getThreads().toString(), undefined);
     expect(threads).toEqual([mockThread]);
   });
 
@@ -20,7 +20,7 @@ describe('AppApi', () => {
     mockedAxios.get.mockResolvedValueOnce(mockThread);
 
     const thread = await appApi.getThread(mockThread.id);
-    expect(mockedAxios.get).toHaveBeenCalledWith(ApiEndpoint.getThread(mockThread.id).toString(), undefined);
+    expect(mockedAxios.get).toHaveBeenCalledWith(AppEndpoint.getThread(mockThread.id).toString(), undefined);
     expect(thread).toEqual(mockThread);
   });
 
@@ -29,7 +29,7 @@ describe('AppApi', () => {
     mockedAxios.post.mockResolvedValueOnce(mockThread);
 
     const thread = await appApi.createThread(title);
-    expect(mockedAxios.post).toHaveBeenCalledWith(ApiEndpoint.createThread().toString(), { title }, undefined);
+    expect(mockedAxios.post).toHaveBeenCalledWith(AppEndpoint.createThread().toString(), { title }, undefined);
     expect(thread).toEqual(mockThread);
   });
 
@@ -40,7 +40,7 @@ describe('AppApi', () => {
 
     const thread = await appApi.updateThread(mockThread.id, title);
     expect(mockedAxios.patch).toHaveBeenCalledWith(
-      ApiEndpoint.updateThread(mockThread.id).toString(),
+      AppEndpoint.updateThread(mockThread.id).toString(),
       { title },
       undefined,
     );
@@ -51,7 +51,7 @@ describe('AppApi', () => {
     mockedAxios.delete.mockResolvedValueOnce(true);
 
     const result = await appApi.deleteThread(mockMessage.id);
-    expect(mockedAxios.delete).toHaveBeenCalledWith(ApiEndpoint.deleteThread(mockThread.id).toString(), undefined);
+    expect(mockedAxios.delete).toHaveBeenCalledWith(AppEndpoint.deleteThread(mockThread.id).toString(), undefined);
     expect(result).toBe(true);
   });
 
@@ -59,8 +59,11 @@ describe('AppApi', () => {
     mockedAxios.post.mockResolvedValueOnce(mockMessage);
 
     const message = await appApi.createMessage(mockCreateMessage);
-    expect(mockedAxios.post).toHaveBeenCalledWith(ApiEndpoint.createMessage().toString(), mockCreateMessage, undefined);
-    expect(message).toEqual(mockMessage);
+    expect(mockedAxios.post).toHaveBeenCalledWith(AppEndpoint.createMessage().toString(), mockCreateMessage, undefined);
+    expect(message).toEqual({
+      ...mockMessage,
+      checkSum: 'auth',
+    });
   });
 
   it('updateMessage', async () => {
@@ -70,18 +73,21 @@ describe('AppApi', () => {
 
     const message = await appApi.updateMessage(mockMessage.id, text);
     expect(mockedAxios.patch).toHaveBeenCalledWith(
-      ApiEndpoint.updateMessage(mockMessage.id).toString(),
+      AppEndpoint.updateMessage(mockMessage.id).toString(),
       { text },
       undefined,
     );
-    expect(message).toEqual(resultMessage);
+    expect(message).toEqual({
+      ...resultMessage,
+      checkSum: 'auth',
+    });
   });
 
   it('deleteMessage', async () => {
     mockedAxios.delete.mockResolvedValueOnce(true);
 
     const result = await appApi.deleteMessage(mockMessage.id);
-    expect(mockedAxios.delete).toHaveBeenCalledWith(ApiEndpoint.deleteMessage(mockMessage.id).toString(), undefined);
+    expect(mockedAxios.delete).toHaveBeenCalledWith(AppEndpoint.deleteMessage(mockMessage.id).toString(), undefined);
     expect(result).toBe(true);
   });
 });

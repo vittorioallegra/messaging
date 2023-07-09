@@ -2,7 +2,7 @@ import { PropsWithChildren, createContext, useCallback, useEffect, useState } fr
 
 import { AuthApi } from '../apis';
 import { User } from '../interfaces';
-import { createUseContext } from '../utils';
+import { Store, createUseContext } from '../utils';
 
 interface AuthContextProps {
   user?: User;
@@ -16,14 +16,16 @@ AuthContext.displayName = 'AuthContext';
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [api] = useState(new AuthApi());
+  const [store] = useState(new Store<User>('user'));
   const [user, setUser] = useState<User | undefined>(undefined);
   const [hasLoginError, setHasLoginError] = useState(false);
 
   useEffect(() => {
-    const user = localStorage.getItem('user');
+    const user = store.getItem();
     if (user) {
-      setUser(JSON.parse(user));
+      setUser(user);
     }
+    // eslint-disable-next-line
   }, []);
 
   const login = useCallback(
@@ -33,19 +35,19 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         .then((user) => {
           setHasLoginError(false);
           setUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
+          store.setItem(user);
         })
         .catch(() => {
           setHasLoginError(true);
         });
     },
-    [api],
+    [api, store],
   );
 
   const logout = useCallback(() => {
     setUser(undefined);
-    localStorage.removeItem('user');
-  }, []);
+    store.removeItem();
+  }, [store]);
 
   return (
     <AuthContext.Provider

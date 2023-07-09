@@ -1,2 +1,2 @@
 export * from './context-helper';
-export * from './string';
+export * from './store';

@@ -8,7 +8,6 @@ export const mockMessage: Message = {
   checkSum: 'checkSum',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt',
 };
 
 export const mockCreateMessage: CreateMessage = {

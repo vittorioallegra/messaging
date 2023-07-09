@@ -1,6 +1,6 @@
 import { CreateMessage, Message, Thread } from '../interfaces';
 import { BaseApi } from './base';
-import { ApiEndpoint } from './utils';
+import { AppEndpoint } from './utils';
 
 export class AppApi extends BaseApi {
   private userId: string;
@@ -11,28 +11,28 @@ export class AppApi extends BaseApi {
   }
 
   getThreads = (): Promise<Thread[]> => {
-    return this.get(ApiEndpoint.getThreads());
+    return this.get(AppEndpoint.getThreads());
   };
 
   getThread = (id: string): Promise<Thread> => {
-    return this.get(ApiEndpoint.getThread(id));
+    return this.get(AppEndpoint.getThread(id));
   };
 
   createThread = (title: string): Promise<Thread> => {
-    return this.post(ApiEndpoint.createThread(), { title });
+    return this.post(AppEndpoint.createThread(), { title });
   };
 
   updateThread = (id: string, title: string): Promise<Thread> => {
-    return this.patch(ApiEndpoint.updateThread(id), { title });
+    return this.patch(AppEndpoint.updateThread(id), { title });
   };
 
   deleteThread = (id: string): Promise<boolean> => {
-    return this.delete(ApiEndpoint.deleteThread(id));
+    return this.delete(AppEndpoint.deleteThread(id));
   };
 
   createMessage = async (body: CreateMessage): Promise<Message> => {
     try {
-      const message: Message = await this.post(ApiEndpoint.createMessage(), body);
+      const message: Message = await this.post(AppEndpoint.createMessage(), body);
       return Promise.resolve({
         ...message,
         checkSum: this.userId,
@@ -44,7 +44,7 @@ export class AppApi extends BaseApi {
 
   updateMessage = async (id: string, text: string): Promise<Message> => {
     try {
-      const message: Message = await this.patch(ApiEndpoint.updateMessage(id), { text });
+      const message: Message = await this.patch(AppEndpoint.updateMessage(id), { text });
       return Promise.resolve({
         ...message,
         checkSum: this.userId,
@@ -55,6 +55,6 @@ export class AppApi extends BaseApi {
   };
 
   deleteMessage = (id: string): Promise<boolean> => {
-    return this.delete(ApiEndpoint.deleteMessage(id));
+    return this.delete(AppEndpoint.deleteMessage(id));
   };
 }

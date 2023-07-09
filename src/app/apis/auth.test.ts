@@ -2,7 +2,7 @@ import axios, { AxiosStatic } from 'axios';
 
 import { mockUser } from '../mocks';
 import { AuthApi } from './auth';
-import { ApiEndpoint } from './utils';
+import { AuthEndpoint } from './utils';
 
 describe('AuthApi', () => {
   const mockedAxios = axios as jest.Mocked<AxiosStatic>;
@@ -13,7 +13,7 @@ describe('AuthApi', () => {
 
     const user = await appApi.login(mockUser.email);
     expect(mockedAxios.post).toHaveBeenCalledWith(
-      ApiEndpoint.login().toString(),
+      AuthEndpoint.login().toString(),
       {
         email: mockUser.email,
       },

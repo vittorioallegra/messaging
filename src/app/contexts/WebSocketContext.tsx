@@ -1,8 +1,8 @@
-import { formatISO } from 'date-fns';
 import { PropsWithChildren, createContext, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 
+import { messageDeleted, messageTypes, messageUpdated, messagesReducer, selectMessages } from '../features';
 import { Message, MessageList, WebSocketMessage, WebSocketSubscription } from '../interfaces';
-import { createUseContext } from '../utils';
+import { Store, createUseContext } from '../utils';
 
 // properties that provides this context
 interface WebSocketContextProps {
@@ -21,59 +21,19 @@ type WebSocketProviderProps = PropsWithChildren<{
   authorization: string;
 }>;
 
-function websocketReducer(state: MessageList, action: WebSocketMessage | undefined): MessageList {
-  if (action) {
-    switch (action.type) {
-      case 'MESSAGE_CREATED':
-        return {
-          ...state,
-          [action.payload.threadId]: [...(state[action.payload.threadId] ?? []), action.payload.message],
-        };
-      case 'MESSAGE_UPDATED':
-        return {
-          ...state,
-          [action.payload.threadId]: (state[action.payload.threadId] ?? []).map((it) =>
-            it.id === action.payload.message.id ? action.payload.message : it,
-          ),
-        };
-      case 'MESSAGE_DELETED':
-        return {
-          ...state,
-          [action.payload.threadId]: (state[action.payload.threadId] ?? []).map((it) =>
-            it.id === action.payload.messageId
-              ? {
-                  ...it,
-                  deletedAt: formatISO(Date.now()),
-                }
-              : it,
-          ),
-        };
-    }
-  } else {
-    return {};
-  }
-}
-
 export const WebSocketProvider = ({ authorization, children }: WebSocketProviderProps) => {
+  const [store] = useState(new Store<MessageList>('messages'));
   const [websocket, setWebSocket] = useState<WebSocket | undefined>(undefined);
-  const [messageList, dispatch] = useReducer(websocketReducer, {}, () => {
-    const messages = localStorage.getItem('messages');
-    if (messages) {
-      return JSON.parse(messages);
-    }
-    return {};
-  });
+  const [messageList, dispatch] = useReducer(messagesReducer, {}, () => store.getItem() ?? {});
   const [threadId, setThreadId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    localStorage.setItem('messages', JSON.stringify(messageList));
+    store.setItem(messageList);
+    // eslint-disable-next-line
   }, [messageList]);
 
   const messages = useMemo(() => {
-    if (threadId && messageList[threadId]) {
-      return messageList[threadId].sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1));
-    }
-    return [];
+    return selectMessages(messageList, threadId);
   }, [messageList, threadId]);
 
   const disconnect = useCallback(() => {
@@ -100,7 +60,7 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
       };
       socket.onmessage = (event) => {
         const message: WebSocketMessage = JSON.parse(event.data);
-        if (['MESSAGE_CREATED', 'MESSAGE_UPDATED', 'MESSAGE_DELETED'].includes(message.type)) {
+        if (messageTypes.includes(message.type)) {
           dispatch(message);
         }
       };
@@ -113,13 +73,7 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
   const updateMessage = useCallback(
     (message: Message) => {
       if (threadId) {
-        const websocketMessage: WebSocketMessage = {
-          type: 'MESSAGE_UPDATED',
-          payload: {
-            message,
-            threadId,
-          },
-        };
+        const websocketMessage = messageUpdated(message, threadId);
         dispatch(websocketMessage);
         if (websocket) {
           websocket.send(JSON.stringify(websocketMessage));
@@ -132,13 +86,7 @@ export const WebSocketProvider = ({ authorization, children }: WebSocketProvider
   const deleteMessage = useCallback(
     (messageId: string) => {
       if (threadId) {
-        const websocketMessage: WebSocketMessage = {
-          type: 'MESSAGE_DELETED',
-          payload: {
-            messageId,
-            threadId,
-          },
-        };
+        const websocketMessage = messageDeleted(messageId, threadId);
         dispatch(websocketMessage);
         if (websocket) {
           websocket.send(JSON.stringify(websocketMessage));
