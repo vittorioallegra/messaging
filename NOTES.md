@@ -1,0 +1,5 @@
+The following hacks were implemented in order to get around some api limitations:
+
+- an authorization token is hardcoded in order to be able to handle multi user chats
+- instead of calling the delete message endpoint, the update gets called with a predefined text. The delete endpoint was causing the complete deletion of the message, instead of just marking it as deleted. by doing this hack, it is then possible for all chat members to get always all messages and then discriminate based on message text if message was deleted or not. If message was deleted, the updatedAt property contains the deletion timestamp
+- in order to display the chat member full name, the displayName property of the message contains a subset of the user interface (id, firstName, lastName). id was required since the get thread endpoint was returning all messages without the checkSum property. So, it was not possible to distinguish chat member messages based on any other properties, since userId will always be the same as the hardcoded authorization
